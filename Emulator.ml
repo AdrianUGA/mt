@@ -247,23 +247,35 @@ struct
 
   (** NEW 27/03/2107 *)
 
-  (* PROJET 2017: modifiez ce code -> *)
-  (* let build_encoding : Alphabet.t -> encoding
-    = fun alphabet ->
-      let symbol_to_bits : Symbol.t -> Bits.t
-        = fun symbol -> [ Bit.zero ; Bit.unit ]
-      in
-      List.map (fun symbol -> (symbol, symbol_to_bits symbol)) alphabet.symbols *)
-
   let build_encoding : Alphabet.t -> encoding = fun alphabet ->
     List.map2 (fun symbol bits -> (symbol, bits)) alphabet.symbols (Bits.enumerate (List.length alphabet.symbols))
 
 
+  (* Test if element is about symbol. If it is, it returns its Bits encoding *)
+  let binary_of : (Symbol.t * Bits.t) -> Symbol.t -> Bits.t = fun element symbol ->
+    match element with
+    | (s, b) -> if s = symbol then b else []
+
+  let rec get_encoding : encoding -> Symbol.t -> Bits.t = fun encoding symbol ->
+    match encoding with
+    | h::t -> if binary_of h symbol = [] then get_encoding t symbole else binary_of h symbol
+    | [] -> print_string "Encoding not found !!"
+
+  let rec encode_list_with : encoding -> Symbol.t list -> Symbol.t list = fun encoding symbols ->
+    match symbols with
+    | s::ymbols -> get_encoding encoding s @ encode_list_with encoding ymbols
+    | [] -> []
+
   (** MODIFIED 27/03/2107 *)
-  let encode_with : encoding -> Band.t list -> Band.t list
   (* PROJET 2017: modifiez ce code -> *)
-    = fun encoding ->
-      (fun bands -> bands)
+  let rec encode_with : encoding -> Band.t list -> Band.t list = fun encoding band ->
+    {band with 
+      left=List.rev (encode_list_with encoding (List.rev band.left))
+      head=get_encoding encoding band.head
+      right=encode_list_with encoding band.right
+    }
+
+      
 
 
   (* REVERSE TRANSLATION *)
