@@ -250,38 +250,27 @@ struct
   let build_encoding : Alphabet.t -> encoding = fun alphabet ->
     List.map2 (fun symbol bits -> (symbol, bits)) alphabet.symbols (Bits.enumerate (List.length alphabet.symbols))
 
-
-  (* Test if element correponds symbol. If it is, it returns its Bits encoding *)
-  let binary_of : (Symbol.t * Bits.t) -> Symbol.t -> Bits.t = fun element symbol ->
-    match element with
-    | (s, b) -> if s = symbol then b else []
-
-  let rec get_encoding : encoding -> Symbol.t -> Bits.t = fun encoding symbol ->
-    match encoding with
-    | h::t -> if binary_of h symbol = [] then get_encoding t symbol else binary_of h symbol
-    | [] -> []
-
-  let rec encode_list_with : encoding -> Symbol.t list -> Symbol.t list = fun encoding symbols ->
-  (* let find : Symbol.t -> Symbol.t -> boolean = fun symbol to_find -> if symbol = to_find then true else false in *)
-    match symbols with
-    | s::ymbols -> get_encoding encoding s @ encode_list_with encoding ymbols
-    (* | s::ymbols -> List.find (find s) encoding  @ encode_list_with encoding ymbols *)
-    | [] -> []
-
-  let rec encode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
-  let head_symbols = get_encoding encoding band.head in
-    {band with
-      left  = List.rev (encode_list_with encoding (List.rev band.left));
-      head  = List.hd head_symbols;
-      right = List.tl head_symbols @ (encode_list_with encoding band.right);
-    }
-
+ 
+   
   (** MODIFIED 27/03/2017 *)
   (* PROJET 2017: modifiez ce code -> *)
   let rec encode_with : encoding -> Band.t list -> Band.t list = fun encoding bands ->
-  match bands with
-  | h::tail -> (encode_band_with encoding h) :: encode_with encoding tail
-  | [] -> []
+  let find : Symbol.t -> (Symbol.t * Bits.t) -> bool = fun symbol to_find -> if symbol = Pervasives.fst to_find then true else false in
+  let encoding_of : encoding -> Symbol.t -> Bits.t = fun encoding symbol -> Pervasives.snd (List.find (find symbol) encoding) in
+  let encode_list_with : encoding -> Symbol.t list -> Symbol.t list =
+    fun encoding symbols -> List.flatten ( List.map (encoding_of encoding) symbols) in
+  let rec encode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
+    let head_symbols = encoding_of encoding band.head in
+      {band with
+        left  = List.rev (encode_list_with encoding (List.rev band.left));
+        head  = List.hd head_symbols;
+        right = List.tl head_symbols @ (encode_list_with encoding band.right);
+      }
+    in
+
+    match bands with
+    | h::tail -> (encode_band_with encoding h) :: encode_with encoding tail
+    | [] -> []
 
       
 
