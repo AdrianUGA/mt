@@ -228,7 +228,7 @@ struct
 
   (* The modules Bit and Bits are defined in Alphabet.ml *)
 
-  (** NEW 27/03/2107 *)
+  (** NEW 27/03/2017 *)
   open Tricks
 
   type encoding = (Symbol.t * Bits.t) list
@@ -245,47 +245,60 @@ struct
 
 
 
-  (** NEW 27/03/2107 *)
+  (** NEW 27/03/2017 *)
 
   let build_encoding : Alphabet.t -> encoding = fun alphabet ->
     List.map2 (fun symbol bits -> (symbol, bits)) alphabet.symbols (Bits.enumerate (List.length alphabet.symbols))
 
 
-  (* Test if element is about symbol. If it is, it returns its Bits encoding *)
+  (* Test if element correponds symbol. If it is, it returns its Bits encoding *)
   let binary_of : (Symbol.t * Bits.t) -> Symbol.t -> Bits.t = fun element symbol ->
     match element with
     | (s, b) -> if s = symbol then b else []
 
   let rec get_encoding : encoding -> Symbol.t -> Bits.t = fun encoding symbol ->
     match encoding with
-    | h::t -> if binary_of h symbol = [] then get_encoding t symbole else binary_of h symbol
-    | [] -> print_string "Encoding not found !!"
-
-  let rec encode_list_with : encoding -> Symbol.t list -> Symbol.t list = fun encoding symbols ->
-    match symbols with
-    | s::ymbols -> get_encoding encoding s @ encode_list_with encoding ymbols
+    | h::t -> if binary_of h symbol = [] then get_encoding t symbol else binary_of h symbol
     | [] -> []
 
-  (** MODIFIED 27/03/2107 *)
-  (* PROJET 2017: modifiez ce code -> *)
-  let rec encode_with : encoding -> Band.t list -> Band.t list = fun encoding band ->
-    {band with 
-      left=List.rev (encode_list_with encoding (List.rev band.left))
-      head=get_encoding encoding band.head
-      right=encode_list_with encoding band.right
+  let rec encode_list_with : encoding -> Symbol.t list -> Symbol.t list = fun encoding symbols ->
+  (* let find : Symbol.t -> Symbol.t -> boolean = fun symbol to_find -> if symbol = to_find then true else false in *)
+    match symbols with
+    | s::ymbols -> get_encoding encoding s @ encode_list_with encoding ymbols
+    (* | s::ymbols -> List.find (find s) encoding  @ encode_list_with encoding ymbols *)
+    | [] -> []
+
+  let rec encode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
+  let head_symbols = get_encoding encoding band.head in
+    {band with
+      left  = List.rev (encode_list_with encoding (List.rev band.left));
+      head  = List.hd head_symbols;
+      right = List.tl head_symbols @ (encode_list_with encoding band.right);
     }
+
+  (** MODIFIED 27/03/2017 *)
+  (* PROJET 2017: modifiez ce code -> *)
+  let rec encode_with : encoding -> Band.t list -> Band.t list = fun encoding bands ->
+  match bands with
+  | h::tail -> (encode_band_with encoding h) :: encode_with encoding tail
+  | [] -> []
 
       
 
 
   (* REVERSE TRANSLATION *)
 
-  (** MODIFIED 27/03/2107 *)
-  let decode_with : encoding -> Band.t list -> Band.t list
+  (** MODIFIED 27/03/2017 *)
   (* PROJET 2017: modifiez ce code -> *)
+  let decode_with : encoding -> Band.t list -> Band.t list
     = fun encoding ->
       (fun bands -> bands)
-
+(* let decode_with : encoding -> Band.t list -> Band.t list
+    = fun encoding band ->
+    let e0 = List.nth band 0
+    and e1 = List.nth band 1
+    and e2 = List.nth band 2
+  in *)
 
   (* EMULATION OF TRANSITIONS *)
 
@@ -301,7 +314,7 @@ struct
 
   (* THE SIMULATOR *)
 
-  (** MODIFIED 27/03/2107 *)
+  (** MODIFIED 27/03/2017 *)
   let make_simulator : Alphabet.t -> simulator
     = fun alphabet ->
       let encoding = build_encoding alphabet in
@@ -325,7 +338,7 @@ let (demo: unit -> unit) = fun () ->
   let cfg = Configuration.make tm [ band ] in
   let _final_cfg = Simulator.log_run_using
       ([ (* Split.simulator ; *)
-        (** MODIFIED 27/03/2107 *) Binary.make_simulator alphabet
+        (** MODIFIED 27/03/2017 *) Binary.make_simulator alphabet
       ],[])
       cfg
   in (
