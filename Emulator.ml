@@ -263,6 +263,7 @@ struct
           left  = List.rev (encode_list_with encoding (List.rev band.left));
           head  = List.hd head_symbols;
           right = List.tl head_symbols @ (encode_list_with encoding band.right);
+          alphabet = Alphabet.binary
         }
       in
 
@@ -278,12 +279,16 @@ struct
   (* REVERSE TRANSLATION *)
 
   (** MODIFIED 27/03/2017 *)
-  (* PROJET 2017: modifiez ce code -> *)
   let rec decode_with : encoding -> Band.t list -> Band.t list = fun encoding bands ->
-  let log_2 : int -> int = fun i -> 4 in
+  let log_2 : int -> int = fun i -> Bits.nb_bits_for i in
   let nb_bits = (log_2 (List.length encoding)) in
   let rec nth_firsts : int -> Bits.t -> Bits.t = fun n liste -> if n=0 then [] else List.hd liste :: nth_firsts (n-1) (List.tl liste) in
   let rec lasts_after_nth : int -> Bits.t -> Bits.t = fun n liste -> if n=0 then liste else lasts_after_nth (n-1) (List.tl liste) in
+  let rec extract_symbols : encoding -> symbols = fun encoding ->
+    match encoding with
+    | h::tail -> Pervasives.fst h :: extract_symbols tail
+    | [] -> []
+  in
   let find : Bits.t -> (Symbol.t * Bits.t) -> bool = fun bits encoding -> if bits=(Pervasives.snd encoding) then true else false in
   (* The list of decoding_of is the right length *)
   let decoding_of : encoding -> Symbol.t list -> Symbol.t = fun encoding symbols -> Pervasives.fst (List.find (find symbols) encoding) in
@@ -294,7 +299,8 @@ struct
     {band with
       left = List.rev (decode_list_with encoding (List.rev band.left));
       head = decoding_of encoding real_head;
-      right = (decode_list_with encoding real_right)
+      right = (decode_list_with encoding real_right);
+      alphabet = Alphabet.make (extract_symbols encoding)
     }
   in
     match bands with
@@ -304,8 +310,8 @@ struct
 
   (* EMULATION OF TRANSITIONS *)
 
-  let (emulate_action: State.t * Action.t * State.t -> Turing_Machine.t)
   (* PROJET 2017: modifiez ce code -> *)
+  let (emulate_action: State.t * Action.t * State.t -> Turing_Machine.t)
     = fun (source,action,target) ->
       { Turing_Machine.nop with
         name = String.concat "" [ "Binary" ; Pretty.parentheses (Action.to_ascii action) ] ;
