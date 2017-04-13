@@ -292,7 +292,7 @@ struct
   let find : Bits.t -> (Symbol.t * Bits.t) -> bool = fun bits encoding -> if bits=(Pervasives.snd encoding) then true else false in
   (* The list of decoding_of is the right length *)
   let decoding_of : encoding -> Symbol.t list -> Symbol.t = fun encoding symbols -> Pervasives.fst (List.find (find symbols) encoding) in
-  let rec decode_list_with : encoding -> Symbol.t list -> Symbol.t list= fun encoding symbols -> decoding_of encoding (nth_firsts nb_bits symbols) :: decode_list_with encoding (lasts_after_nth nb_bits symbols) in
+  let rec decode_list_with : encoding -> Symbol.t list -> Symbol.t list= fun encoding symbols -> if symbols=[] then [] else (decoding_of encoding (nth_firsts nb_bits symbols) :: decode_list_with encoding (lasts_after_nth nb_bits symbols)) in
   let decode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
   let real_head = band.head :: nth_firsts (nb_bits-1) band.right in
   let real_right = lasts_after_nth (nb_bits-1) band.right in
