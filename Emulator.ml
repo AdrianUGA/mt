@@ -257,7 +257,7 @@ struct
     let encoding_of : encoding -> Symbol.t -> Bits.t = fun encoding symbol -> Pervasives.snd (List.find (find symbol) encoding) in
     let encode_list_with : encoding -> Symbol.t list -> Symbol.t list =
       fun encoding symbols -> List.flatten ( List.map (encoding_of encoding) symbols) in
-    let rec encode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
+    let encode_band_with : encoding -> Band.t -> Band.t = fun encoding band ->
       let head_symbols = encoding_of encoding band.head in
         {band with
           left  = List.rev (encode_list_with encoding (List.rev band.left));
@@ -282,8 +282,8 @@ struct
   let rec decode_with : encoding -> Band.t list -> Band.t list = fun encoding bands ->
   let log_2 : int -> int = fun i -> Bits.nb_bits_for i in
   let nb_bits = (log_2 (List.length encoding)) in
-  let rec nth_firsts : int -> Bits.t -> Bits.t = fun n liste -> if n=0 then [] else List.hd liste :: nth_firsts (n-1) (List.tl liste) in
-  let rec lasts_after_nth : int -> Bits.t -> Bits.t = fun n liste -> if n=0 then liste else lasts_after_nth (n-1) (List.tl liste) in
+  let rec nth_firsts : int -> Bits.t -> Bits.t = fun n liste -> if n=0 || List.length liste=0 then [] else List.hd liste :: nth_firsts (n-1) (List.tl liste) in
+  let rec lasts_after_nth : int -> Bits.t -> Bits.t = fun n liste -> if n=0 || List.length liste=0 then liste else lasts_after_nth (n-1) (List.tl liste) in
   let rec extract_symbols : encoding -> symbols = fun encoding ->
     match encoding with
     | h::tail -> Pervasives.fst h :: extract_symbols tail
