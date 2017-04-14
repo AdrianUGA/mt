@@ -57,11 +57,11 @@ let (color_to_rgb: color -> int * int * int) = fun color ->
 
 (* PREDEFINED COLOR *)		
 
-let (black:  color) = COL "black"
-let (white:  color) = COL "white"
+let (black:  color) = COL "#222222"
+let (white:  color) = COL "#EEEEEE"
 let (magenta:color) = COL "magenta"
-let (cyan:   color) = COL "cyan"
-let (blue:   color) = COL "blue"
+let (cyan:   color) = COL "1199FF"
+let (blue:   color) = COL "223399"
 let (yellow: color) = COL "yellow"
 let (red:    color) = COL "red"
 let (green:  color) = COL "green"

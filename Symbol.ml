@@ -89,9 +89,9 @@ module Symbol =
     let color : symbol -> Color.t * Color.t
       = fun symbol ->
         match symbol with (* back_ground_color, font_color *)
-        | B -> (Color.white , Color.white)
-        | Z -> (Color.blue  , Color.yellow)
-        | U -> (Color.yellow, Color.blue)
+        | B -> (Color.white , Color.black)
+        | Z -> (Color.blue  , Color.white)
+        | U -> (Color.cyan, Color.black)
         | D -> (Color.black , Color.black)
         | S -> (Color.red   , Color.red)
         | _ -> (Color.white , Color.black)

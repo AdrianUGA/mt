@@ -149,7 +149,7 @@ module Band =
     let (to_html_many: Html.options -> band list -> Html.table) = fun options bands -> 
 	  let rows = List.map (to_html []) bands in
 	    Html.table
-	      (options @ [ ("bordercolor", Html.Color Color.white) ; ("cellpadding",Html.Int 1) ; ("cellspacing",Html.Int 0) ; ("border",Html.Int 1) ])
+	      (options @ [ ("bordercolor", Html.Color Color.white) ; ("cellpadding",Html.Int 1) ; ("cellspacing",Html.Int 1) ; ("border",Html.Int 1) ])
 	      rows
 	      
     (* user *)
